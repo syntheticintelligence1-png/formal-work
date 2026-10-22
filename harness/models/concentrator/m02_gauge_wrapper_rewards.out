@@ -1,0 +1,18 @@
+== harvestBribes without checkpoint, case A (now >= finishAt): un-accumulated stream destroyed ==
+  control_checkpoint=False: after 1st bribe RD(queued=448000, rate=115740740740740, lastUpdate=+0.00d, finishAt=+7.00d); 2nd bribe branch=period-finished-branch
+    claimed alice=35000000000000078000 asdCRV=35000000000000078000 total=70000000000000156000; SDT custody left=69999999999999844000 (orphaned = custody - outstanding = 69999999999999552800)
+  control_checkpoint=True: after 1st bribe RD(queued=448000, rate=115740740740740, lastUpdate=+0.00d, finishAt=+7.00d); 2nd bribe branch=period-finished-branch
+    claimed alice=69999999999999854000 asdCRV=69999999999999854000 total=139999999999999708000; SDT custody left=292000 (orphaned = custody - outstanding = 800)
+
+== harvestBribes without checkpoint, case B (now < finishAt, 10% rule passes): vested part re-streamed ==
+  control_checkpoint=False: branch=re-extend-branch; alice (exits at +3d) claims 0; asdCRV claims 109999999999999468000 at +11d
+  control_checkpoint=True: branch=re-extend-branch; alice (exits at +3d) claims 14999999999999904000; asdCRV claims 94999999999999737000 at +11d
+
+== unregisterRewardToken (R3) + syncActiveRewardTokens (R1): custody re-notified -> insolvency ==
+  t=+8d after unregister: active=['sdCRV'] historical=['SDT'] SDT custody=70000000000000000000 outstanding claims=69999999999999552000
+  after syncActiveRewardTokens(): active=['sdCRV', 'SDT'] historical=['SDT'] rewardData=RD(queued=291200, rate=115740740740741, lastUpdate=+8.00d, finishAt=+15.00d)
+  t=+16d outstanding claims=139999999999999708000 vs SDT custody=70000000000000000000 (deficit 69999999999999708000)
+  alice claim -> {'sdCRV': 0, 'SDT': 69999999999999854000}
+  asdCRV claim -> REVERT('SafeERC20: transfer amount exceeds balance (SDT)') [state rolled back]
+  asdCRV claimHistorical([SDT]) -> REVERT('SafeERC20: transfer amount exceeds balance (SDT)') [state rolled back]
+  asdCRV still owed 69999999999999854000 SDT; custody 146000

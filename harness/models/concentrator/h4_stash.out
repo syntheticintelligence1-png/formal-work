@@ -1,0 +1,5 @@
+== H4: processBatch([SDT], [[SDT->WETH]], WETH, [WETH->asset], keeper, minAsset) ==
+    minAsset=0 -> OK; compounder received 0 asset; SDT now held by converter: 100000000000000000000; SDT left in stash: 0
+    minAsset=1 -> REVERT (VM Exception while processing transaction: reverted with custom error 'InsufficientHarvestedAssets()')
+    control process(SDT, [SDT->WETH, WETH->asset]) -> compounder received 100000000000000000000 asset
+    processBatch called by a non-harvester -> REVERT (VM Exception while processing transaction: reverted with custom error 'CallerNotHarvester()')

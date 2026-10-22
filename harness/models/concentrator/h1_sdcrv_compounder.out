@@ -1,0 +1,24 @@
+== H1.S2: withdraw fee 5%, SdCrvCompounder._withdraw takes no fee ==
+    TS=200000000000000000000 TAS=210000000000000000000 totalAssets()=210000000000000000000
+    previewRedeem(10e18)=9975000000000000000 redeem(10e18) delivered=10500000000000000000 (delivered-preview=525000000000000000)
+    previewWithdraw(10e18)=10025062656641604009 withdraw(10e18): burned=10025062656641604009 delivered=10526315789473684209 (requested 10e18)
+    withdraw(type(uint256).max) by alice -> REVERT (VM Exception while processing transaction: reverted with reason string 'asdCRV: insufficient owner shares')
+    redeem(type(uint256).max) by alice -> OK
+== H1.mint: TS=2, TAS=3, mint(1) ==
+    previewMint(1)=1; mint(1): assets pulled=1, shares received=0
+== H1.S3: periodLength 7d, vault emptied while streaming; first depositor captures; victim gets 0 shares ==
+    rewardInfo rate=1157407407407407 periodLength=604800
+    +1d alice redeems all -> 1099999999999999964800; TS=0 TAS=0
+    +3d mallory deposit(1) -> shares 1; totalAssets()=199999999999999929601
+    victim previewDeposit(150e18)=0
+    +3d+1s victim deposit(150e18) -> shares 0; TAS=350001157407407337008
+    mallory redeems 1 share -> 350002314814814744415
+    victim redeem(MAX) -> REVERT (VM Exception while processing transaction: reverted with reason string 'asdCRV: withdraw zero share')
+== H1.P0: periodLength 0, empty vault receives reward -> TAS>0, TS=0 -> deposits mint 0 shares ==
+    TS=0 TAS=10000000000000000000
+    alice deposit(100e18) -> shares 0; TS=0 TAS=110000000000000000000
+    alice redeem(MAX) -> REVERT (VM Exception while processing transaction: reverted with reason string 'asdCRV: withdraw zero share')
+    harvest() on an empty vault with platform fee 10% -> REVERT (VM Exception while processing transaction: invalid opcode)
+== H1.S4: periodLength 7d -> 0 at +1d (owner), back to 7d at +10d ==
+    settle*=false: bob previewRedeem(at block before redeem)=1099999999999999964800 redeem=1000000000000000000000 (preview-actual=99999999999999964800); alice at +10d redeem=1699999999999999753600
+    settle*=true: bob previewRedeem(at block before redeem)=1099999999999999964800 redeem=1049999999999999982400 (preview-actual=49999999999999982400); alice at +10d redeem=1649999999999999771200

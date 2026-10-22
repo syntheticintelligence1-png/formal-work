@@ -1,0 +1,15 @@
+== processBatch: tokens=[SDT], intermediate=WETH, partial=[[SDT->WETH]], final=[WETH->asset] ==
+  intended result (NatSpec) = 100000000000000000000 asset
+  converter zero-input returns 0, minAsset=0: OK _assets=0 convert-calls(kind, token, _amount, amountIn passed)=[('direct', 'SDT', 100000000000000000000, 0)]
+     stash->compounder deposited=0; stranded in converter: {'SDT': 100000000000000000000}
+  intended result (NatSpec) = 100000000000000000000 asset
+  converter zero-input reverts, minAsset=0: REVERT('converter: zero amount')
+  minAsset=1 (any positive slippage bound): REVERT('InsufficientHarvestedAssets')
+== processBatch: tokens=[asset, SDT] (stash holds 10e18 asset), same routes ==
+  intended result (NatSpec) = 110000000000000000000 asset
+  minAsset=0: REVERT('ERC20: transfer amount exceeds balance [asset@stash]')
+== processBatch: intermediate == asset, tokens=[asset, SDT], partial=[[],[SDT->asset]], final=[] ==
+  intended result (NatSpec) = 110000000000000000000 asset
+  minAsset=0: REVERT('ERC20: transfer amount exceeds balance [asset@stash]')
+== process (single token) for comparison: converts the token's own balance ==
+  process(SDT, [SDT->WETH, WETH->asset]) -> 100000000000000000000 asset deposited=100000000000000000000

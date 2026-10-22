@@ -1,0 +1,4 @@
+actions checked: 200000
+  dilution of incumbent xToken holders at the action's own price: 0 cases
+  outputs exceeding the exact rational amount (liability-inflating): 0 cases
+  max output deficit vs exact amount: 0.999995 output-token wei (quantized, polarity <= 0)

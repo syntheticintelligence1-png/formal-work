@@ -1,0 +1,3 @@
+user stake 100/1000, no ve for 4 weeks, locks 20% of ve supply 60 s before checkpoint:
+  implementation time-weighted boost = 0.7579 ; NatSpec definition = 0.4000 ; FXN for the 4 weeks inflated by 89.5%
+reverse (full ve for 4 weeks, lock ends/transferred just before checkpoint): impl = 0.9077 ; spec = 1.0000

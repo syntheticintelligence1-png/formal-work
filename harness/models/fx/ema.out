@@ -1,0 +1,7 @@
+=== flow property: U_{s+t} vs U_t o U_s with an intermediate poke that re-samples the SAME value ===
+max |D(s,t)| over 20000 random cases = 87 wei (quantized; exact in real arithmetic)
+
+=== CII: a permissionless poke (harvest(), L9648) samples a transient leverage value ===
+T=   60s: EMA 2.000000 -> 1.854985 after one 12s held sample (7.251% move); value 1h later 2.000000
+T=  600s: EMA 2.000000 -> 1.984159 after one 12s held sample (0.792% move); value 1h later 1.999961
+T= 3600s: EMA 2.000000 -> 1.997338 after one 12s held sample (0.133% move); value 1h later 1.999021

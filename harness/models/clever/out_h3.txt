@@ -1,0 +1,23 @@
+=== H3a: 18-dec base, P = 7d, strategy percentage 65535/1e5 (uint16 max, L4984 / L5198) ===
+  alice.deposit(alice, 1000e18 debt)                                 -> ok
+  dist: transfer 700e18 base + distribute(dist, base, 700e18)        -> ok
+  updatePendingDistribution() after period 1                         -> ok
+  dist: transfer 700e18 base + distribute(...) [period 2]            -> ok
+  base in contract=941254999999999838522 in strategy=458745000000000161478
+  totalBaseTokenInPool()                                             -> 700000000000000246400
+  alice.claim(alice)  [realised from period 1]                       -> ok
+  base in contract=241253842592592677515 in strategy=458745000000000161478
+  totalBaseTokenInPool()                                             -> VIEW REVERT VM Exception while processing transaction: reverted with reason string 'SafeMath: subtract
+  bob.deposit(bob, 10e18 debt)                                       -> REVERT VM Exception while processing transaction: reverted with reason string 'SafeMath: subtraction overfl
+  dist: distribute(dist, base, 1)  [harvest path L5436]              -> REVERT VM Exception while processing transaction: reverted with reason string 'SafeMath: subtraction overfl
+
+=== H3b: 6-dec base, P = 7d, no strategy ===
+  alice.deposit(alice, 1000e18 debt)                                 -> ok
+  dist: transfer 700e6 base + distribute(dist, base, 700e6)          -> ok
+  rewardInfo.ratePerSecond = 1157407407407407 (debt units/s); base balance = 700000000 (base units)
+  totalBaseTokenInPool()                                             -> VIEW REVERT VM Exception while processing transaction: reverted with reason string 'SafeMath: subtract
+  bob.deposit(bob, 10e18 debt)  [during period]                      -> REVERT VM Exception while processing transaction: reverted with reason string 'SafeMath: subtraction overfl
+
+=== H3c: 6-dec base, P = 7d, strategy 50% ===
+  alice.deposit(alice, 1000e18 debt)                                 -> ok
+  dist: transfer 700e6 + distribute(dist, base, 700e6)               -> REVERT VM Exception while processing transaction: reverted with reason string 'SafeMath: subtraction overfl

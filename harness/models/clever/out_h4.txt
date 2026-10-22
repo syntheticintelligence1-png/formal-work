@@ -1,0 +1,20 @@
+Compiled 1 Solidity file successfully (evm target: paris).
+=== H4: AMO shares exist, then the Furnace is paid off ===
+  bob.deposit(1000e18 CVX, bob)                                          -> ok
+  bob.unlock(0)  [first shares, totalSupply was 0]                       -> ok
+  AMO shares: bob=500160401342000000000 ; Furnace.getUserInfo(AMO)=(499839598658000000000, 0) ; ratio()=10006418112
+  keeper.distribute(keeper, TU + 100e18 = 599839598658000000000)  [paid off] -> ok
+  Furnace.getUserInfo(AMO)=(unrealised 0, realised 499839598658000000000) ; free CVX in Furnace=100000000000000000000
+  bob.withdraw(all shares, bob, 0, 0)                                    -> REVERT VM Exception while processing transaction: invalid opcode
+  bob.withdrawToBase(all shares, bob, 0)                                 -> REVERT VM Exception while processing transaction: invalid opcode
+  anyone.checkpoint()                                                    -> REVERT VM Exception while processing transaction: invalid opcode
+  owner.rebalance(1, 0, 0, max)                                          -> REVERT VM Exception while processing transaction: invalid opcode
+  -- dust variant: pendingBaseToken makes the converted amount not a multiple of 1e9 --
+  someone.donate(123 wei)                                                -> ok
+  anyone.checkpoint()                                                    -> ok
+  Furnace.getUserInfo(AMO)=(unrealised 0, realised 123)
+  bob.withdraw(all shares, bob, 0, 0)                                    -> REVERT VM Exception while processing transaction: reverted with reason string 'curve: assert D1 > D0'
+  alice.deposit(1000e18 CVX, alice)                                      -> ok
+  someone.donate(123 wei)                                                -> ok
+  alice.unlock(0)                                                        -> ok
+  alice shares = 0  (her 1000e18 CVX left the lock: AMO CVX balance 1000000000000000000123 -> 0)

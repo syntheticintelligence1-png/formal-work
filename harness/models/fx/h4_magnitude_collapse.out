@@ -1,0 +1,33 @@
+== Part 1: mag -> 0 after three liquidations; later depositors are locked ==
+  A.deposit(1e18): ok
+  liquidate(1e18 - 1e9 - 1): ok
+  product (epoch 0, exp 0, mag 1000000000) S = 1000000001
+  B.deposit(to S = 1e18): ok
+  liquidate(1e18 - 1): ok
+  product (epoch 0, exp 1, mag 1) S = 1
+  C.deposit(to S = 1e18): ok
+  liquidate(1e18 - 1e9 + 1): ok
+  product (epoch 0, exp 2, mag 0) S = 999999999
+  D.deposit(5e18): ok
+  dist.depositReward(FXN, 700e18): ok
+  balanceOf(D): REVERT VM Exception while processing transaction: reverted with panic code 0x12 (Division or modulo division by zero)
+  claimable(D, base): REVERT VM Exception while processing transaction: reverted with panic code 0x12 (Division or modulo division by zero)
+  D.withdraw(5e18): REVERT VM Exception while processing transaction: reverted with panic code 0x12 (Division or modulo division by zero)
+  D.claim(): REVERT VM Exception while processing transaction: reverted with panic code 0x12 (Division or modulo division by zero)
+  liquidate(max) - full wipe, new epoch: ok
+  product (epoch 1, exp 0, mag 1000000000000000000)
+  D.claim() in the new epoch: REVERT VM Exception while processing transaction: reverted with panic code 0x12 (Division or modulo division by zero)
+  D.deposit(1e18) in the new epoch: REVERT VM Exception while processing transaction: reverted with panic code 0x12 (Division or modulo division by zero)
+
+== Part 2: denormal snapshot (exp 1, mag 1); two 1-token liquidations zero a 1e6-token stake ==
+  A.deposit(1e18): ok
+  liquidate(1e18 - 1e9 - 1): ok
+  B.deposit(to S = 1e18): ok
+  liquidate(1e18 - 1): ok
+  product (epoch 0, exp 1, mag 1) S = 1
+  U(C).deposit(1e24): ok
+  liquidate(1e18): ok
+  product (epoch 0, exp 2, mag 999999000)  balanceOf(U) = 999999000000000000000000  totalSupply = 999999000000000000000001
+  liquidate(1e18): ok
+  product (epoch 0, exp 3, mag 999998000000000000)  balanceOf(U) = 0  totalSupply = 999998000000000000000001
+  U.withdraw(max): REVERT VM Exception while processing transaction: reverted with custom error 'WithdrawZeroAmount()'

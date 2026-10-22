@@ -1,0 +1,55 @@
+epoch dates: 2957=2026-09-03 2958=2026-09-10 2970=2026-12-03 2975=2027-01-07 ; 'now' (2026-10-22) = epoch 2964
+skip=()       TUG-E (CVX) after each patch epoch:
+     2957 ok                                       10000.00
+     2958 ok                                      114074.28
+     2970 ok                                       37616.21
+     2971 ok                                       10000.00
+     2972 ok                                      119018.71
+     2973 ok                                      118456.80
+     2974 ok                                       27658.91
+     2975 ok                                       10000.00
+skip=(2958,)  TUG-E (CVX) after each patch epoch:
+     2957 ok                                       10000.00
+     2958 SKIPPED                                  10000.00
+     2970 REVERT SafeMath: subtraction overflow       10000.00
+     2971 REVERT SafeMath: subtraction overflow       10000.00
+     2972 ok                                      119018.71
+     2973 ok                                      118456.80
+     2974 ok                                       27658.91
+     2975 ok                                       10000.00
+skip=(2970,)  TUG-E (CVX) after each patch epoch:
+     2957 ok                                       10000.00
+     2958 ok                                      114074.28
+     2970 SKIPPED                                 114074.28
+     2971 ok                                       86458.07
+     2972 ok                                      195476.78
+     2973 ok                                      194914.87
+     2974 ok                                      104116.98
+     2975 ok                                       86458.07
+skip=(2971,)  TUG-E (CVX) after each patch epoch:
+     2957 ok                                       10000.00
+     2958 ok                                      114074.28
+     2970 ok                                       37616.21
+     2971 SKIPPED                                  37616.21
+     2972 ok                                      146634.92
+     2973 ok                                      146073.01
+     2974 ok                                       55275.11
+     2975 ok                                       37616.21
+skip=(2972,)  TUG-E (CVX) after each patch epoch:
+     2957 ok                                       10000.00
+     2958 ok                                      114074.28
+     2970 ok                                       37616.21
+     2971 ok                                       10000.00
+     2972 SKIPPED                                  10000.00
+     2973 ok                                        9438.09
+     2974 ok                                      -81359.80
+     2975 ok                                      -99018.71
+skip=(2974,)  TUG-E (CVX) after each patch epoch:
+     2957 ok                                       10000.00
+     2958 ok                                      114074.28
+     2970 ok                                       37616.21
+     2971 ok                                       10000.00
+     2972 ok                                      119018.71
+     2973 ok                                      118456.80
+     2974 SKIPPED                                 118456.80
+     2975 ok                                      100797.89

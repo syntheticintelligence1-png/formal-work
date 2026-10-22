@@ -1,0 +1,41 @@
+== Part 1: division by zero after an epoch reset ==
+  O.toggleVoteSharing(A): ok
+  O.toggleVoteSharing(C): ok
+  A.deposit(100e18): ok
+  C.deposit(100e18): ok
+  A.acceptSharedVote(O): ok
+  C.acceptSharedVote(O): ok
+  dist.depositReward(FXN, 7000e18): ok
+  liquidate(max) - consumes the whole pool: ok
+  product after liquidation: (epoch 1, exp 0, mag 1000000000000000000) totalSupply = 0
+  claimable(A, base) [liquidation proceeds] = 0.1
+  C.claim(): ok
+  voteOwnerBalances(O).amount = 0
+  A.claim(): REVERT VM Exception while processing transaction: reverted with panic code 0x12 (Division or modulo division by zero)
+  checkpoint(A) by anyone: REVERT VM Exception while processing transaction: reverted with panic code 0x12 (Division or modulo division by zero)
+  A.rejectSharedVote(): REVERT VM Exception while processing transaction: reverted with panic code 0x12 (Division or modulo division by zero)
+  O.toggleVoteSharing(A): REVERT VM Exception while processing transaction: reverted with panic code 0x12 (Division or modulo division by zero)
+  A.claim() 60 days later: REVERT VM Exception while processing transaction: reverted with panic code 0x12 (Division or modulo division by zero)
+  base received by A: 0.0
+
+== Part 2: owner aggregate 1 wei below the stakers' sum (trace from owner_aggregate.py) ==
+  O.toggleVoteSharing(A): ok
+  O.toggleVoteSharing(B): ok
+  A.deposit(bA): ok
+  B.deposit(bB): ok
+  Z(D).deposit(other): ok
+  A.acceptSharedVote(O): ok
+  B.acceptSharedVote(O): ok
+  liquidate(1225113896997647728728): ok
+  checkpoint(A): ok
+  liquidate(749904313238506790301): ok
+  checkpoint(A): ok
+  liquidate(639883797614578962450): ok
+  checkpoint(A): ok
+  checkpoint(B): ok
+  owner aggregate=523683096230295324212 A=308036965132030262520 B=215646131098265061693 A+B-owner=1
+  A.withdraw(max): ok
+  B.withdraw(max): REVERT VM Exception while processing transaction: reverted with panic code 0x11 (Arithmetic operation overflowed outside of an unchecked block)
+  B.rejectSharedVote(): REVERT VM Exception while processing transaction: reverted with panic code 0x11 (Arithmetic operation overflowed outside of an unchecked block)
+  B.withdraw(balance - 1): REVERT VM Exception while processing transaction: reverted with panic code 0x12 (Division or modulo division by zero)
+  balanceOf(B) left in pool = 215646131098265061693

@@ -1,0 +1,3 @@
+D=0                          honest reward credit=10000000000000000000000  attacker reward credit=0
+D=1000000000000000000000000  honest reward credit=5000000000000000000000  attacker reward credit=5000000000000000000000
+eager (time-weighted) attacker entitlement for the past week = 0

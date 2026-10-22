@@ -1,0 +1,15 @@
+no sandwich: AMO gets lp=2730072068833295260618 debt=2275060057361569866927  value=5005.1321 CVX
+front-run   20000 CVX: AMO lp=2729310308778237602608 debt=2274425257316958065395 value=5003.7356 CVX (loss 1.3966 CVX) | attacker P&L -14.5970 CVX
+front-run  100000 CVX: AMO lp=2726399700715037243366 debt=2271999750595979512491 value=4998.3995 CVX (loss 6.7327 CVX) | attacker P&L -73.2197 CVX
+front-run  300000 CVX: AMO lp=2719079432710668450090 debt=2265899527260247992166 value=4984.9790 CVX (loss 20.1532 CVX) | attacker P&L -219.6092 CVX
+
+scan: max attacker P&L over front-run size X (both directions), various A, B, pool imbalance
+  best (P&L wei, A, B, pool0, pool1, direction, X): (91093482595970552073490, 5, 200000, 300000, 300000, 'buy_debt', 250000)  = 91093.4826 tokens
+
+threshold scan (pool 1,000,000 CVX / 1,200,000 clevCVX): max attacker P&L (CVX) by B and A
+       B\A            10            50           100           200
+      5000         -0.30         -1.32         -1.46         -1.53
+     20000        466.63         -0.49         -1.04         -1.32
+     50000       1511.19        151.77         -0.22         -0.91
+    100000       3257.50        536.27        157.08         -0.24
+    200000       6826.48       1325.37        556.96        165.12

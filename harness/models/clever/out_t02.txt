@@ -1,0 +1,42 @@
+=== T02a: single user, exact (power-of-two) fraction, P = 0 ===
+  alice.deposit(8)                                     -> ('ok', (8, 0))
+  distribute(4)                                        -> ('ok', None)
+  state: TU=4 TR=4 acc=170141183460469231731687303715884105728 idx=1 lpo=0 | rate=0 P=0 lastUpd=0 finishAt=0 | cvx=4 staked=0 clev=8
+      alice: stored=U(unr=8, rea=0, paid=0, idx=0) alpha=(5, 3)
+  alice.withdrawAll()                                  -> ('ok', 5)
+  state: TU=340282366920938463463374607431768211455 TR=4 acc=170141183460469231731687303715884105728 idx=1 lpo=0 | rate=0 P=0 lastUpd=0 finishAt=0 | cvx=4 staked=0 clev=3
+      alice: stored=U(unr=0, rea=3, paid=170141183460469231731687303715884105728, idx=1) alpha=(0, 3)
+  TU == 2^128-1 ? True
+  alice.claim()                                        -> ('ok', 3)
+  bob.deposit(10e18)  (needs unrealised)               -> ('revert', 'Furnace: overflow')
+  locker distribute(1000e18)                           -> ('ok', None)
+  state: TU=340282366920938462463374607431768211455 TR=1000000000000000000001 acc=170141183460469231231687303715884105727 idx=2 lpo=0 | rate=0 P=0 lastUpd=0 finishAt=0 | cvx=1000000000000000000001 staked=0 clev=0
+      alice: stored=U(unr=0, rea=0, paid=170141183460469231731687303715884105728, idx=1) alpha=(0, 0)
+      bob: stored=U(unr=0, rea=0, paid=0, idx=0) alpha=(0, 0)
+  owner-less CVX booked in totalRealised: 1000000000000000000001
+  bob.deposit(10e18) again (headroom = distributed amount) -> ('ok', (10000000000000000000, 0))
+  locker distribute(1000e18)                           -> ('ok', None)
+  state: TU=340282366920938461473374607431768211455 TR=2000000000000000000001 acc=170141183460469230731687303715884105741 idx=3 lpo=0 | rate=0 P=0 lastUpd=0 finishAt=0 | cvx=2000000000000000000001 staked=0 clev=10000000000000000000
+      bob: stored=U(unr=10000000000000000000, rea=0, paid=170141183460469231231687303715884105727, idx=2) alpha=(9999999999999999971, 29)
+  bob realised from a 1000e18 distribution while holding 10e18 unrealised: 29
+  owner-less CVX booked in totalRealised: 1999999999999999999972
+  carol.deposit(5000e18) (> headroom)                  -> ('revert', 'Furnace: overflow')
+
+=== T02b: two users, generic amounts, P = 0 ===
+  alice.deposit(1e18)                                  -> ('ok', (1000000000000000000, 0))
+  bob.deposit(2e18)                                    -> ('ok', (2000000000000000000, 0))
+  distribute(1e18)                                     -> ('ok', None)
+  state: TU=2000000000000000000 TR=1000000000000000000 acc=226854911280625642308916404954512140970 idx=1 lpo=0 | rate=0 P=0 lastUpd=0 finishAt=0 | cvx=1000000000000000000 staked=0 clev=3000000000000000000
+      alice: stored=U(unr=1000000000000000000, rea=0, paid=0, idx=0) alpha=(666666666666666667, 333333333333333333)
+      bob: stored=U(unr=2000000000000000000, rea=0, paid=0, idx=0) alpha=(1333333333333333334, 666666666666666666)
+  sum alpha^U - TU = 1
+  alice.exit()                                         -> ('ok', (666666666666666667, 333333333333333333))
+  bob.exit()                                           -> ('ok', (1333333333333333334, 666666666666666666))
+  state: TU=340282366920938463463374607431768211455 TR=1 acc=226854911280625642308916404954512140970 idx=1 lpo=0 | rate=0 P=0 lastUpd=0 finishAt=0 | cvx=1 staked=0 clev=0
+      alice: stored=U(unr=0, rea=0, paid=226854911280625642308916404954512140970, idx=1) alpha=(0, 0)
+      bob: stored=U(unr=0, rea=0, paid=226854911280625642308916404954512140970, idx=1) alpha=(0, 0)
+  TU wrapped: True  owner-less CVX: 1
+
+=== T02c: honest population, linear mode P=7d, random deposits/pokes, everybody exits ===
+  trials=200  full-exit trials ending with wrapped TU=200
+  distribution of (sum alpha^U - TU) before exit: {1: 18, 2: 36, 3: 39, 4: 29, 5: 30, 6: 23, 7: 19, 8: 6}

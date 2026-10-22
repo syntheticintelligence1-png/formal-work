@@ -1,0 +1,10 @@
+init: totalBaseToken(underlying) = 1100.0  custody(wrapped) = 1000.0  f = 1100000.0  x = 1100000.0
+rate 1.10 -> 1.05: ledger still 1100.0 underlying; custody worth 1050.0 underlying
+  collateralRatio() = 2.0
+  isUnderCollateral() = false
+  xHolder.redeemXToken(all) [junior exits first]: ok
+  xHolder received wrapped: 523.809523809523809523
+  fHolder.redeemFToken(all) [senior]: REVERT Transaction reverted: function call to a non-contract account
+  fHolder.redeemFToken(500000e18): ok
+  fHolder received wrapped: 238.095238095238095238 ; fToken left: 600000.0 ; custody left: 238.095238095238095239
+  fHolder.redeemFToken(remaining): REVERT Transaction reverted: function call to a non-contract account

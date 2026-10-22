@@ -1,0 +1,29 @@
+== Variant (a): exponent 0 -> boost ratio silently forced to the 40% floor ==
+  A.deposit(100e18): ok
+  B.deposit(100e18): ok
+  dist.depositReward(FXN, 7000e18): ok
+  A.claim()  [checkpoint without supply record]: ok
+  numTotalSupplyHistory = 3 ; boostCheckpoint(A).historyIndex = 3 ; boostCheckpoint(B).historyIndex = 2
+  getBoostRatio(A) = 40.00%
+  getBoostRatio(B) = 100.00%
+  A.claim(): ok
+  B.claim(): ok
+  FXN received in this claim: A=200.00231481481481352 (covers 1 day), B=1000.0173611111111046 (covers 2 days)
+
+== Variant (b): exponent >= 1 -> checked uint24 underflow in _getCompoundedBalance (L16445) ==
+  C.deposit(1e18): ok
+  liquidate(maxAmount = 1e18 - 1e8): ok
+  product after liquidation: (epoch 0, exp 1, mag 99999999000000000)
+  A.deposit(100e18): ok
+  B.deposit(100e18): ok
+  dist.depositReward(FXN, 7000e18): ok
+  A.claim(): ok
+  getBoostRatio(A): REVERT VM Exception while processing transaction: reverted with panic code 0x11 (Arithmetic operation overflowed outside of an unchecked block)
+  claimable(A, FXN): REVERT VM Exception while processing transaction: reverted with panic code 0x11 (Arithmetic operation overflowed outside of an unchecked block)
+  A.claim(): REVERT VM Exception while processing transaction: reverted with panic code 0x11 (Arithmetic operation overflowed outside of an unchecked block)
+  A.withdraw(1e18): REVERT VM Exception while processing transaction: reverted with panic code 0x11 (Arithmetic operation overflowed outside of an unchecked block)
+  A.deposit(1e18): REVERT VM Exception while processing transaction: reverted with panic code 0x11 (Arithmetic operation overflowed outside of an unchecked block)
+  getBoostRatio(B) (control) = 100.00%
+  A.withdraw(1e18) after 10 more days: REVERT VM Exception while processing transaction: reverted with panic code 0x11 (Arithmetic operation overflowed outside of an unchecked block)
+  D.deposit(1 wei) for a fresh receiver (appends a history entry): ok
+  A.withdraw(1e18) after the append: ok

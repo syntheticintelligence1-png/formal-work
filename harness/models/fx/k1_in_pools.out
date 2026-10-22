@@ -1,0 +1,8 @@
+next interaction after  2.0 days: accumulated(+queued)  pool-order=7000.0(+1000.0) FXN  K2-order=7000.0(+1000.0) FXN  of 8000 notified; destroyed=0.0 FXN
+next interaction after  6.9 days: accumulated(+queued)  pool-order=7000.0(+1000.0) FXN  K2-order=7000.0(+1000.0) FXN  of 8000 notified; destroyed=0.0 FXN
+next interaction after  8.0 days: accumulated(+queued)  pool-order=1000.0(+0.0) FXN  K2-order=8000.0(+0.0) FXN  of 8000 notified; destroyed=7000.0 FXN
+next interaction after 14.0 days: accumulated(+queued)  pool-order=1000.0(+0.0) FXN  K2-order=8000.0(+0.0) FXN  of 8000 notified; destroyed=7000.0 FXN
+
+daily claims of 1000 FXN, next gauge claim at t=1d+1s (no checkpoint in between):
+  distributed to stakers of [0,1d] at that claim: pool-order=0.0000 FXN, K2-order=142.8588 FXN -> 142.8588 FXN re-streamed over [1d, 8d]
+  new rate: pool-order=3306878306878306 wei/s, K2-order=3070669979668822 wei/s

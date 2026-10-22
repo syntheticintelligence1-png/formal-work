@@ -1,0 +1,41 @@
+== Part A (R2): liquidation leaving 1 wei resets the epoch; stream accrues to the orphan wei ==
+  A.deposit(1e18 + 1): ok
+  dist.depositReward(FXN, 10000e18) [1-week stream]: ok
+  liquidate(maxAmount = 1e18): ok
+  product: (epoch 1, exp 0, mag 1000000000000000000)  totalSupply() = 1  balanceOf(A) = 0
+  claimable(A, base) = 0.000999999999999999
+  -- 5 days later (7142.9 FXN pending, threshold 6277.1 FXN at S = 1 wei)
+  checkpoint(address(0)) [anyone]: REVERT VM Exception while processing transaction: reverted with panic code 0x11 (Arithmetic operation overflowed outside of an unchecked block)
+  B.deposit(1000e18): REVERT VM Exception while processing transaction: reverted with panic code 0x11 (Arithmetic operation overflowed outside of an unchecked block)
+  A.claim(): REVERT VM Exception while processing transaction: reverted with panic code 0x11 (Arithmetic operation overflowed outside of an unchecked block)
+  A.withdraw(1): REVERT VM Exception while processing transaction: reverted with panic code 0x11 (Arithmetic operation overflowed outside of an unchecked block)
+  liquidate(1): REVERT VM Exception while processing transaction: reverted with panic code 0x11 (Arithmetic operation overflowed outside of an unchecked block)
+  dist.depositReward(FXN, 1e18): REVERT VM Exception while processing transaction: reverted with panic code 0x11 (Arithmetic operation overflowed outside of an unchecked block)
+  -- 35 days later
+  checkpoint(address(0)) [anyone]: REVERT VM Exception while processing transaction: reverted with panic code 0x11 (Arithmetic operation overflowed outside of an unchecked block)
+  B.deposit(1000e18): REVERT VM Exception while processing transaction: reverted with panic code 0x11 (Arithmetic operation overflowed outside of an unchecked block)
+  A.claim(): REVERT VM Exception while processing transaction: reverted with panic code 0x11 (Arithmetic operation overflowed outside of an unchecked block)
+  A.withdraw(1): REVERT VM Exception while processing transaction: reverted with panic code 0x11 (Arithmetic operation overflowed outside of an unchecked block)
+  liquidate(1): REVERT VM Exception while processing transaction: reverted with panic code 0x11 (Arithmetic operation overflowed outside of an unchecked block)
+  dist.depositReward(FXN, 1e18): REVERT VM Exception while processing transaction: reverted with panic code 0x11 (Arithmetic operation overflowed outside of an unchecked block)
+
+== Part A' : pokes every 6 h do not help (cumulative overflow) ==
+  A.deposit(1e18 + 1): ok
+  dist.depositReward(FXN, 10000e18): ok
+  liquidate(maxAmount = 1e18): ok
+  poke #18 at +4.50 days: REVERT VM Exception while processing transaction: reverted with panic code 0x11 (Arithmetic operation overflowed outside of an unchecked block)
+
+== Part B (R1): 1-wei first deposit into an empty pool with an active stream ==
+  dist.depositReward(FXN, 10000e18) while totalSupply == 0: ok
+  attacker(D).deposit(1 wei): ok
+  honest B.deposit(1000e18) 5 days later: REVERT VM Exception while processing transaction: reverted with panic code 0x11 (Arithmetic operation overflowed outside of an unchecked block)
+  attacker(D).claim(): REVERT VM Exception while processing transaction: reverted with panic code 0x11 (Arithmetic operation overflowed outside of an unchecked block)
+  attacker(D).withdraw(1): REVERT VM Exception while processing transaction: reverted with panic code 0x11 (Arithmetic operation overflowed outside of an unchecked block)
+
+== Control: same as Part B but B deposits after 4 days (before the threshold) ==
+  dist.depositReward(FXN, 10000e18) while totalSupply == 0: ok
+  attacker(D).deposit(1 wei): ok
+  honest B.deposit(1000e18) 4 days later: ok
+  B.claim() later: ok
+  D.claim(): ok
+  FXN to attacker (1 wei stake): 0.0  FXN to B (1000e18 stake): 1714.2724867724867316

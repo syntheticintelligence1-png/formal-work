@@ -1,0 +1,29 @@
+=== T07a: 18-decimal base, P=7d, strategy percentage = 100%% ===
+  alice.deposit(debt 1000e18)                                  -> ('ok', (1000000000000000000000, 0))
+  distributor: transfer 700e18 base + distribute(700e18)       -> ('ok', None)
+  poke after period 1                                          -> ('ok', None)
+  distributor: transfer 700e18 base + distribute(700e18)       -> ('ok', None)
+  state: TU=300000000000000246400 TR=699999999999999753600 acc=102084710076281622884587591548767860812 | rate=1157407407407407 P=604800 lastUpd=1700691200 finishAt=1701296000 | base=699999999999999753600 strat=700000000000000246400 debt=1000000000000000000000
+      alice: stored=U(unr=1000000000000000000000, rea=0, paid=0, idx=0) alpha=(300000000000000246400, 699999999999999753600)
+  totalBaseTokenInPool() = 700000000000000246400
+  alice.claim()  (realised from period 1, ~700e18)             -> ('ok', 699999999999999753600)
+  state: TU=300000000000000246400 TR=0 acc=102084710076281622884587591548767860812 | rate=1157407407407407 P=604800 lastUpd=1700691200 finishAt=1701296000 | base=0 strat=700000000000000246400 debt=300000000000000246400
+      alice: stored=U(unr=300000000000000246400, rea=0, paid=102084710076281622884587591548767860812, idx=1) alpha=(300000000000000246400, 0)
+  contract+strategy = 700000000000000246400  >= leftover = 699999999999999753600 ; view = REVERT(SafeMath: subtraction overflow)
+  bob.deposit(debt 10e18)                                      -> ('revert', 'SafeMath: subtraction overflow')
+  distributor: transfer 50e18 + distribute(50e18)              -> ('revert', 'SafeMath: subtraction overflow')
+  bob.deposit(debt 10e18) @ +6d23h                             -> ('ok', (0, 10000000000000000000))
+  bob.deposit(debt 10e18) @ +7d (leftover 0)                   -> ('ok', (0, 10000000000000000000))
+
+=== T07b: 6-decimal base (e.g. USDC-like), P=7d, no strategy ===
+  alice.deposit(debt 1000e18)                                  -> ('ok', (1000000000000000000000, 0))
+  distributor: transfer 700e6 base + distribute(700e6)         -> ('ok', None)
+  rate (debt units/s) = 1157407407407407 ; leftover = 699999999999999753600 (debt units) vs base balance = 700000000 (base units)
+  bob.deposit(debt 10e18) during period                        -> ('revert', 'SafeMath: subtraction overflow')
+  alice.claim() during period (claim path has no view)         -> ('ok', 99999999)
+  bob.deposit(debt 10e18) after finishAt                       -> ('ok', (9999998999999788800, 1000000211200))
+
+=== T07c: 6-decimal base, P=7d, WITH strategy (percentage 50%) ===
+  alice.deposit(debt 1000e18)                                  -> ('ok', (1000000000000000000000, 0))
+  distributor: transfer 700e6 + distribute(700e6)              -> ('revert', 'SafeMath: subtraction overflow')
+  => every distribute/harvest reverts while P>0: the stake step (L5436) reads the view

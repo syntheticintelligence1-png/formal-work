@@ -1,0 +1,50 @@
+=== S0: library sanity (matches coordinator's executed values) ===
+mul(encode(0,0,1e9), 1)   -> (epoch 0, exp 1, mag 1)
+mul(encode(0,0,1), 5e8)   -> (epoch 0, exp 1, mag 0)
+
+=== S1: epoch reset (scale==0) while residual supply > 0 (L16386-L16403) ===
+S=1000000000000000001 err=0: window L in [1000000000000000000, 1000000000000000000] (1 values); at L=1000000000000000000: x=1000000000000000000 scale=0 -> prod (epoch 1, exp 0, mag 1000000000000000000), residual S=1
+S=1000000000000000005 err=0: window L in [1000000000000000004, 1000000000000000004] (1 values); at L=1000000000000000004: x=1000000000000000000 scale=0 -> prod (epoch 1, exp 0, mag 1000000000000000000), residual S=1
+S=2000000000000000000 err=0: window L in [1999999999999999998, 1999999999999999999] (2 values); at L=1999999999999999998: x=1000000000000000000 scale=0 -> prod (epoch 1, exp 0, mag 1000000000000000000), residual S=2
+S=1000000000000000000000000 err=0: window L in [999999999999999999000000, 999999999999999999999999] (1000000 values); at L=999999999999999999000000: x=1000000000000000000 scale=0 -> prod (epoch 1, exp 0, mag 1000000000000000000), residual S=1000000
+S=1000000000000000000000000000 err=0: window L in [999999999999999999000000000, 999999999999999999999999999] (1000000000 values); at L=999999999999999999000000000: x=1000000000000000000 scale=0 -> prod (epoch 1, exp 0, mag 1000000000000000000), residual S=1000000000
+
+--- S1b: users' view after the reset (one user owns all of S=1e18+1, L=S-1) ---
+after liquidate(L=1e18): x=1000000000000000000 scale=0 prod=(epoch 1, exp 0, mag 1000000000000000000) totalSupply=1
+balanceOf(A) = compounded(1000000000000000001, (epoch 0, exp 0, mag 1000000000000000000), (epoch 1, exp 0, mag 1000000000000000000)) = 0   => sum_u balance = 0 != totalSupply = 1 (O3c violated)
+
+=== S2: uint192 integral overflow at dust total share (L17151) ===
+S=1        mag=1e18: single-call revert threshold a > 6277101735386680763835 wei (= 6277.1017 tokens of 18 dec); cumulative threshold identical
+S=2        mag=1e18: single-call revert threshold a > 12554203470773361527671 wei (= 12554.2035 tokens of 18 dec); cumulative threshold identical
+S=10       mag=1e18: single-call revert threshold a > 62771017353866807638357 wei (= 62771.0174 tokens of 18 dec); cumulative threshold identical
+S=1000     mag=1e18: single-call revert threshold a > 6277101735386680763835789 wei (= 6277101.7354 tokens of 18 dec); cumulative threshold identical
+S=1000000  mag=1e18: single-call revert threshold a > 6277101735386680763835789423 wei (= 6277101735.3867 tokens of 18 dec); cumulative threshold identical
+orphan S=1, 10k tokens/week, hourly pokes: first revert after 106.0 h (4.42 days): Panic(0x11) overflow/underflow in integral += L17151
+orphan S=1, single poke after 5 days (7142.9 tokens pending): Panic(0x11) overflow/underflow in uint192 mul L17151
+100 tokens while S=1 orphan, then B deposits 50e18 and 100 more tokens: claimable(B) = 99999999999999999950 wei; unattributed = 100000000000000000050 wei (100.000000 tokens)
+
+=== S3: magnitude collapse to 0 via three liquidations (L16669-L16671) ===
+L1=1e18-1e9-1 on S=1e18:            x=999999999000000000 scale=1000000000 -> (epoch 0, exp 0, mag 1000000000)  S=1000000001 err=1000000000000000000
+deposit to S=1e18; L2=1e18-1:      x=999999999999999999 scale=1 -> (epoch 0, exp 1, mag 1)  S=1 err=1000000000000000000
+deposit to S=1e18; L3=1e18-1e9+1:  x=999999999000000001 scale=999999999 -> (epoch 0, exp 2, mag 0)  S=999999999 err=1000000000000000000
+D deposits 5e18 at product (epoch 0, exp 2, mag 0)
+  withdraw(D) -> REVERT Panic(0x12) division by zero in _claimable L17051
+  claimable(D) -> REVERT Panic(0x12) division by zero in _claimable L17051
+  balanceOf(D) -> REVERT Panic(0x12) division by zero in _getCompoundedBalance L16452
+  accumulate(1000e18) at mag 0: integral delta = 0 (reward lost)
+  after a full wipe: prod=(epoch 1, exp 0, mag 1000000000000000000)
+  checkpoint(D) after new epoch -> REVERT Panic(0x12) division by zero in _claimable L17051 (permanent)
+
+=== S4: O4d with a denormal snapshot (mag_u = 1): two small liquidations zero a ~unchanged stake ===
+after setup: (epoch 0, exp 1, mag 1) S=1
+U deposits 1e24 at (epoch 0, exp 1, mag 1); S=1000000000000000000000001
+  small liquidation L=1e18: scale=999999000000000000 -> (epoch 0, exp 2, mag 999999000)  compounded(U)=999999000000000000000000
+  small liquidation L=1e18: scale=999998999998999999 -> (epoch 0, exp 3, mag 999998000000000000)  compounded(U)=0
+  exact (real-number) stake of U = 1e24 * prod(now)/prod(U) = 9.999980e+23  vs implementation 0
+
+=== S5: B2 commutation defect of a liquidation (lazy floor vs eager b*(S-L)/S) ===
+2000 random traces: max relative per-user defect = -9.325e-13 (polarity <= 0); max orphan S - sum(balances) = 2308681271 wei
+
+=== S6: _lossNumerator underflow (L16392): tiny loss after a large-error liquidation ===
+err after first liquidation = 999993000000000000000000
+liquidate(L=1 wei) -> REVERT Panic(0x11) overflow/underflow in _lossNumerator L16392

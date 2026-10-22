@@ -1,0 +1,25 @@
+=== T11a: random agreement with the Curve reference (A in {10,50,100,1000}, fee 0.04%) ===
+  max |mint_AMOMath - mint_Curve| = 1 wei ; max |new balances diff| = 0 wei ; max |swap diff| = 1 wei (rel 2.47e-24)
+
+=== T11b: boundary inputs ===
+  AMOMath.swap(dx=0)            -> ('ok', 0)  (wrapped? False)
+  Curve exchange(dx=0)          -> ('ok', 0)
+  AMOMath.swap(dx=1)            -> ('ok', 1)
+  Curve exchange(dx=1)          -> ('ok', 1)
+  AMOMath.getInvariant(x=0,y)   -> ('revert', 'AMOMath: division by zero (0.7 INVALID)')
+  AMOMath.addLiquidity(dx=0)    -> ('ok', (1000000000000000000000000, 1500000000000000000000000, 0))
+  Curve add_liquidity([0,0])    -> ('revert', 'curve: assert D1 > D0')
+
+=== T11c: _searchSplit boundary behaviour (num/den = AMO lp/debt balances, L9050) ===
+  dx < UNIT (e.g. donate(1)+dust)                  add=0                          swap=500000000      add_liquidity=('revert', 'curve: assert D1 > D0') exchange=('skipped', None)
+  den = 0 (AMO debt balance 0), dx multiple of 1e9 add=1000000000000000000000     swap=0              add_liquidity=('ok', 1002125318067726623330) exchange=('ok', 0)
+  den = 0, dx not multiple of 1e9                  add=1000000000000000000000     swap=123            add_liquidity=('ok', 1002125318067726623330) exchange=('ok', 123)
+  num = 0 (AMO lp balance 0)                       add=0                          swap=1000000000000000000000 add_liquidity=('revert', 'curve: assert D1 > D0') exchange=('skipped', None)
+  regular                                          add=545889689605000000000      swap=454110310395000000000 add_liquidity=('ok', 547050769433559252824) exchange=('ok', 455875641194936434855)
+
+=== T11d: monotonicity of add_out/swap_out in the split (binary-search precondition) ===
+  add_out/swap_out non-decreasing over the grid: True
+
+=== T11e: random search: does AMOMath.swap(dx in {0,1}) ever wrap (y - getTokenOut(x+dx) - 1 < 0)? ===
+  states=3000  AMOMath wraps: dx=0 -> 1259, dx=1 -> 0 ; Curve exchange reverts: dx=0 -> 1304, dx=1 -> 2
+  example wrap: (13397368729165873874488832, 59276837194939196064624303, 1000, 0, 115792089225736986499839365466330809352401193880313565572893527603967371239144)

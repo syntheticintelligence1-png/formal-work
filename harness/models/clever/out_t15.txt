@@ -1,0 +1,2 @@
+states sampled: sum alpha^U - TU  <0: 0   =0: 19047   >0: 14448
+worst negative excess (claim-side shortfall in wei): 0

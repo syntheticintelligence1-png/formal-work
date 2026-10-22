@@ -1,0 +1,19 @@
+{
+  "name": "sbd-harness",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Executable counterexample harness for the SBD analysis of gigabundle.txt",
+  "scripts": {
+    "setup": "python3 -I tools/extract.py ../gigabundle.txt contracts/bundle",
+    "compile": "hardhat compile"
+  },
+  "dependencies": {
+    "@nomicfoundation/hardhat-ethers": "3.0.8",
+    "@openzeppelin/contracts": "3.4.2",
+    "@openzeppelin/contracts-upgradeable": "3.4.2",
+    "@openzeppelin/contracts-upgradeable-v4": "npm:@openzeppelin/contracts-upgradeable@4.9.6",
+    "@openzeppelin/contracts-v4": "npm:@openzeppelin/contracts@4.9.6",
+    "ethers": "6.13.4",
+    "hardhat": "2.22.17"
+  }
+}

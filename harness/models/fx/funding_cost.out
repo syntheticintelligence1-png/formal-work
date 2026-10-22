@@ -1,0 +1,13 @@
+=== F1: repeated funding-cost deduction while harvest() early-returns (price invalid) ===
+k= 0 invalid-price actions: totalBaseToken drop=1.250000 base, distributed=1.250000 base, custody-ledger surplus=0.000000 base, xValue 1000000.00 -> 997500.00 USD
+k= 1 invalid-price actions: totalBaseToken drop=2.498436 base, distributed=1.248436 base, custody-ledger surplus=1.250000 base, xValue 1000000.00 -> 995003.13 USD
+k= 5 invalid-price actions: totalBaseToken drop=7.476494 base, distributed=1.242158 base, custody-ledger surplus=6.234336 base, xValue 1000000.00 -> 985047.01 USD
+k=20 invalid-price actions: totalBaseToken drop=25.918879 base, distributed=1.218342 base, custody-ledger surplus=24.700537 base, xValue 1000000.00 -> 948162.24 USD
+
+=== B3: flow property of funding accrual (valid prices, no other actions) ===
+U_{s+t}: one harvest over +10% index: 12500000000000000000 wei; U_t o U_s: two harvests (+5%, then rest): 12164944594189877070 wei; D = 335055405810122930 wei (2.6804% of charge)
+
+=== B3: price at poke time re-prices the whole unsettled interval ===
+harvest when price=1800: charge = 1.234568 base (= 2222.22 USD)
+harvest when price=2000: charge = 1.250000 base (= 2500.00 USD)
+harvest when price=2200: charge = 1.239669 base (= 2727.27 USD)

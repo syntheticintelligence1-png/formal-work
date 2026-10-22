@@ -1,0 +1,36 @@
+=== T08a: reference trace, keeper processes every epoch ===
+  [epoch 2900] alice.deposit(100e18)                          -> ('ok', None)
+  [epoch 2900] eve.deposit(100e18)                            -> ('ok', None)
+  [epoch 2901] bob.deposit(100e18)                            -> ('ok', None)
+  [epoch 2905] alice.unlock(100e18)                           -> ('ok', None)
+     alice pendingUnlockList: [[100000000000000000000, 2917]]
+  [epoch 2917] keeper.processUnlockableCVX()                  -> ('ok', None)
+  [epoch 2917] alice.withdrawUnlocked()                       -> ('ok', 100000000000000000000)
+     invariants: I-L1 TLG+TPUG<=convex=True, I-L2 TUG<=cvx+staked=True, I-L3 matured<=TUG=True | TLG=200000000000000000000 TPUG=0 TUG=0 convex=200000000000000000000 cvx=0 staked=0 matured=0
+
+=== T08b: keeper misses epoch e0+17 (one week) ===
+  [epoch 2900] alice.deposit(100e18)                          -> ('ok', None)
+  [epoch 2900] eve.deposit(100e18)                            -> ('ok', None)
+  [epoch 2901] bob.deposit(100e18)                            -> ('ok', None)
+  [epoch 2901] carol.deposit(100e18)                          -> ('ok', None)
+  [epoch 2905] alice.unlock(100e18)   -> unlockEpoch e0+17    -> ('ok', None)
+  [epoch 2905] carol.unlock(100e18)   -> unlockEpoch e0+18    -> ('ok', None)
+  [epoch 2917] (keeper does not run in this epoch)
+     invariants: I-L1 TLG+TPUG<=convex=True, I-L2 TUG<=cvx+staked=True, I-L3 matured<=TUG=False | TLG=200000000000000000000 TPUG=200000000000000000000 TUG=0 convex=400000000000000000000 cvx=0 staked=0 matured=100000000000000000000
+  [epoch 2918] keeper.processUnlockableCVX()                  -> ('ok', None)
+     invariants: I-L1 TLG+TPUG<=convex=True, I-L2 TUG<=cvx+staked=True, I-L3 matured<=TUG=False | TLG=200000000000000000000 TPUG=100000000000000000000 TUG=100000000000000000000 convex=300000000000000000000 cvx=100000000000000000000 staked=0 matured=200000000000000000000
+     convex locks: {2935: 300000000000000000000}  pendingUnlocked[e0+17] = 100000000000000000000
+  [epoch 2918] alice.withdrawUnlocked()  (first: drains carol's) -> ('ok', 100000000000000000000)
+  [epoch 2918] carol.withdrawUnlocked()                       -> ('revert', 'SafeMath: subtraction overflow')
+     invariants: I-L1 TLG+TPUG<=convex=True, I-L2 TUG<=cvx+staked=True, I-L3 matured<=TUG=False | TLG=200000000000000000000 TPUG=100000000000000000000 TUG=0 convex=300000000000000000000 cvx=0 staked=0 matured=100000000000000000000
+
+=== T08c: drift propagation 17 epochs later (residue class moved by one) ===
+  [epoch 2919] keeper.processUnlockableCVX()                  -> ('revert', 'CvxLocker: no exp locks')
+  [epoch 2919] eve.unlock(100e18)  (eve's residue = e0 mod 17 -> unlockEpoch e0+34) -> ('ok', None)
+     eve pendingUnlockList: [[100000000000000000000, 2934]]  convex locks: {2935: 300000000000000000000}
+  [epoch 2934] keeper.processUnlockableCVX()                  -> ('revert', 'CvxLocker: no exp locks')
+     invariants: I-L1 TLG+TPUG<=convex=True, I-L2 TUG<=cvx+staked=True, I-L3 matured<=TUG=False | TLG=100000000000000000000 TPUG=200000000000000000000 TUG=0 convex=300000000000000000000 cvx=0 staked=0 matured=200000000000000000000
+  [epoch 2935] keeper.processUnlockableCVX()                  -> ('ok', None)
+  [epoch 2935] eve.withdrawUnlocked()                         -> ('revert', 'SafeMath: subtraction overflow')
+     invariants: I-L1 TLG+TPUG<=convex=True, I-L2 TUG<=cvx+staked=True, I-L3 matured<=TUG=False | TLG=100000000000000000000 TPUG=200000000000000000000 TUG=0 convex=300000000000000000000 cvx=0 staked=0 matured=200000000000000000000
+     pendingUnlocked never consumed: {17: 100000000000000000000, 34: 100000000000000000000}

@@ -1,0 +1,10 @@
+K5 discharge: guard maxima vs 2^30 = 1073741824
+  all four fields written at their guard maximum, read back intact: True {'expense': 500000000, 'harvester': 100000000, 'withdrawFee': 100000000, 'booster': 200000000}
+  boundary sweep corruptions: 0
+Relaxation (guard >= 2^30): expense value 2^30 + 7 written at offset 0
+  expense reads 7 ; harvester field corrupted from 12344 to 12345
+
+K6 discharge in AladdinCompounder: setWithdrawFeeForUser requires rate <= 1e8 (L3059);
+  minimal divisor FEE_PRECISION - rate = 900000000 (> 0) at L2980
+Relaxation: a consumer that exposes _setFeeCustomization with only its own bound rate <= 1e9 (L4036):
+  rate = 1e9 -> SafeMath.div(x, 0) -> revert 'SafeMath: division by zero' in withdraw() for that owner

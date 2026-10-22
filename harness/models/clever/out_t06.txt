@@ -1,0 +1,12 @@
+=== T06a: P = 0, attacker deposits right before the permissionless locker harvest ===
+  CLeverCVXLocker.harvest() -> Furnace.distribute(10000e18)      -> ('ok', None)
+  others' realised = 10000000000000000000000
+  attacker.deposit(1000000e18)  [same tx as harvest]             -> ('ok', (1000000000000000000000000, 0))
+  CLeverCVXLocker.harvest() -> Furnace.distribute(10000e18)      -> ('ok', None)
+  attacker.exit()  [same tx]                                     -> ('ok', (995000000000000000000000, 5000000000000000000000))
+  others' realised = 5000000000000000000000
+  => attacker converts 5000e18 clevCVX to CVX at 1:1 immediately; others' realisation halves
+
+=== T06b: B4  updatePeriodLength(0) mid-period without settlement ===
+  settle_first=True  free CVX after toggle=600000000000000035200  backrunner (unrealised, realised)=(99999999999999964800, 600000000000000035200)  alice alpha=(9900000000000000035200, 99999999999999964800)
+  settle_first=False free CVX after toggle=700000000000000000000  backrunner (unrealised, realised)=(0, 700000000000000000000)  alice alpha=(10000000000000000000000, 0)

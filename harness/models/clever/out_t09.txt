@@ -1,0 +1,31 @@
+=== T09 third_party_claims_first=False ===
+  [epoch 2900] alice.deposit(1000e18)                                     -> ('ok', None)
+  [epoch 2900] carol.deposit(500e18)                                      -> ('ok', None)
+  [epoch 2901] dave.deposit(10e18)  (a lock expiring at e0+18)            -> ('ok', None)
+  [epoch 2902] erin.deposit(10e18)  (a lock expiring at e0+19)            -> ('ok', None)
+  [epoch 2902] carol.unlock(500e18) -> unlockEpoch e0+17                  -> ('ok', None)
+  [epoch 2917] keeper.processUnlockableCVX()                              -> ('ok', None)
+     I-L1 TLG+TPUG<=convex=True, I-L2 TUG<=cvx+staked=True, I-L3 matured<=TUG=True | TLG=1020000000000000000000 TPUG=0 TUG=500000000000000000000 convex=1020000000000000000000 cvx=500000000000000000000 staked=0 matured=500000000000000000000
+  [epoch 2918] keeper.harvestVotiumLikeBribes([CVX,200e18]) claims now    -> ('ok', 200000000000000000000)
+  [epoch 2918] keeper.processUnlockableCVX()                              -> ('ok', None)
+     I-L1 TLG+TPUG<=convex=True, I-L2 TUG<=cvx+staked=True, I-L3 matured<=TUG=True | TLG=1020000000000000000000 TPUG=0 TUG=500000000000000000000 convex=1020000000000000000000 cvx=500000000000000000000 staked=0 matured=500000000000000000000
+     furnace received 180000000000000000000, platform received 20000000000000000000
+  [epoch 2918] carol.withdrawUnlocked()                                   -> ('ok', 500000000000000000000)
+  [epoch 2919] keeper.processUnlockableCVX() next week                    -> ('ok', None)
+
+=== T09 third_party_claims_first=True ===
+  [epoch 2900] alice.deposit(1000e18)                                     -> ('ok', None)
+  [epoch 2900] carol.deposit(500e18)                                      -> ('ok', None)
+  [epoch 2901] dave.deposit(10e18)  (a lock expiring at e0+18)            -> ('ok', None)
+  [epoch 2902] erin.deposit(10e18)  (a lock expiring at e0+19)            -> ('ok', None)
+  [epoch 2902] carol.unlock(500e18) -> unlockEpoch e0+17                  -> ('ok', None)
+  [epoch 2917] keeper.processUnlockableCVX()                              -> ('ok', None)
+     I-L1 TLG+TPUG<=convex=True, I-L2 TUG<=cvx+staked=True, I-L3 matured<=TUG=True | TLG=1020000000000000000000 TPUG=0 TUG=500000000000000000000 convex=1020000000000000000000 cvx=500000000000000000000 staked=0 matured=500000000000000000000
+  [epoch 2918] R1: VotiumStash.claim(CVX, idx, locker, 200e18, proof)  (permissionless)
+  [epoch 2918] keeper.processUnlockableCVX()  (relocks 'extra' CVX)       -> ('ok', None)
+  [epoch 2918] keeper.harvestVotiumLikeBribes([CVX,200e18]) isClaimed=true -> ('ok', 200000000000000000000)
+     I-L1 TLG+TPUG<=convex=True, I-L2 TUG<=cvx+staked=False, I-L3 matured<=TUG=True | TLG=1020000000000000000000 TPUG=0 TUG=500000000000000000000 convex=1220000000000000000000 cvx=300000000000000000000 staked=0 matured=500000000000000000000
+     furnace received 180000000000000000000, platform received 20000000000000000000
+  [epoch 2918] carol.withdrawUnlocked()                                   -> ('revert', 'RewardPool: withdraw exceeds stake')
+  [epoch 2919] keeper.processUnlockableCVX() next week                    -> ('revert', 'SafeMath: subtraction overflow')
+

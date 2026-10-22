@@ -1,0 +1,9 @@
+t0: CR=1.2500 (stability ratio 1.3) fSupply=1000000  -> stability mode; fToken mint paused in SM, xToken redeem NOT paused
+   direct mintFToken -> REVERT ErrorFTokenMintPausedInStabilityMode (guard holds)
+1. mintXToken(500 base): x minted=1982000.00, CR=1.7455
+2. mintFToken(1e6 base requested, capped to 1485.0000 base): f minted=1481287.50, CR=1.3004
+3. redeemXToken(all 1982000.00 x): base out (net)=455.9380, CR=1.1008, fSupply=2481288
+net: fSupply +1481288 while CR went 1.2500 -> 1.1008 (stability mode before and after); attacker paid fees 47.7745 base (3.225% of f minted)
+
+=== K6-like: fee ratio 1e18 accepted by _validateFeeRatio (L7525-L7532) ===
+_deductMintFee with feeRatio0 == FEE_PRECISION: (max*1e18)/(1e18-1e18) -> Panic(0x12) division by zero (every fToken mint reverts)

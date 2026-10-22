@@ -1,0 +1,9 @@
+=== H5: AMO over a Furnace with periodLength = 7 days ===
+  bob.deposit(1000e18 CVX, bob)                                -> ok
+  bob.unlock(0)                                                -> ok
+  keeper.distribute(keeper, 100e18)  [period starts]           -> ok
+  whitelisted distribute(.., 1) after finishAt (= locker.donate(1)) -> ok
+  AMO.checkpoint()                                             -> REVERT VM Exception while processing transaction: reverted with reason string 'Furnace: overflow'
+  bob.withdraw(all, bob, 0, 0)                                 -> REVERT VM Exception while processing transaction: reverted with reason string 'Furnace: overflow'
+  bob.withdrawToBase(all, bob, 0)                              -> REVERT VM Exception while processing transaction: reverted with reason string 'Furnace: overflow'
+  AMO.harvest(bob, 0)  [harvester unset]                       -> REVERT VM Exception while processing transaction: reverted with reason string 'Furnace: overflow'

@@ -1,0 +1,25 @@
+  A.deposit(2^65)          [A.paid = 0]                  -> ('ok', (36893488147419103232, 0))
+  distribute(2^65 - 1)     [TU -> 1]                     -> ('ok', None)
+  state: TU=1 TR=36893488147419103231 acc=9223372036854775808 idx=1 lpo=0 | rate=0 P=0 lastUpd=0 finishAt=0 | cvx=36893488147419103231 staked=0 clev=36893488147419103232
+      A: stored=U(unr=36893488147419103232, rea=0, paid=0, idx=0) alpha=(2, 36893488147419103230)
+  V.deposit(2^65)          [V.paid = acc_1]              -> ('ok', (36893488147419103232, 0))
+  distribute(2^65)         [TU -> 1]                     -> ('ok', None)
+  state: TU=1 TR=73786976294838206463 acc=0 idx=2 lpo=0 | rate=0 P=0 lastUpd=0 finishAt=0 | cvx=73786976294838206463 staked=0 clev=73786976294838206464
+      A: stored=U(unr=36893488147419103232, rea=0, paid=0, idx=0) alpha=(36893488147419103232, 0)
+      V: stored=U(unr=36893488147419103232, rea=0, paid=9223372036854775808, idx=1) alpha=(5, 36893488147419103227)
+  acc == 0 (underflow, decoded as 1.0)? True   lastPaidOff bumped? False
+  sum alpha^U = 36893488147419103237  vs  TU = 1  (excess 36893488147419103236 wei)
+  A's realisation (2^65-1 wei) has been reverted to unrealised; it is still booked in TR
+  W.deposit(10^21)                                       -> ('ok', (1000000000000000000000, 0))
+  distribute(10^20)        [acc := _mul128(0,f) = f]     -> ('ok', None)
+  state: TU=900000000000000000001 TR=173786976294838206463 acc=306254130228844617117071174925283484156 idx=3 lpo=0 | rate=0 P=0 lastUpd=0 finishAt=0 | cvx=173786976294838206463 staked=0 clev=1073786976294838206464
+      A: stored=U(unr=36893488147419103232, rea=0, paid=0, idx=0) alpha=(33204139332677192909, 3689348814741910323)
+      V: stored=U(unr=36893488147419103232, rea=0, paid=9223372036854775808, idx=1) alpha=VIEW-REVERT(Furnace: overflow)
+      W: stored=U(unr=1000000000000000000000, rea=0, paid=0, idx=2) alpha=(900000000000000000001, 99999999999999999999)
+  V.withdrawAll()  (stale paid = acc_1 small)            -> ('revert', 'Furnace: overflow')
+  A.withdrawAll()                                        -> ('ok', 33204139332677192909)
+  state: TU=866795860667322807092 TR=173786976294838206463 acc=306254130228844617117071174925283484156 idx=3 lpo=0 | rate=0 P=0 lastUpd=0 finishAt=0 | cvx=173786976294838206463 staked=0 clev=1040582836962161013555
+      A: stored=U(unr=0, rea=3689348814741910323, paid=306254130228844617117071174925283484156, idx=3) alpha=(0, 3689348814741910323)
+      V: stored=U(unr=36893488147419103232, rea=0, paid=9223372036854775808, idx=1) alpha=VIEW-REVERT(Furnace: overflow)
+      W: stored=U(unr=1000000000000000000000, rea=0, paid=0, idx=2) alpha=(900000000000000000001, 99999999999999999999)
+  TU wrapped? False

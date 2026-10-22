@@ -1,0 +1,40 @@
+== S2: SdCrvCompounder._withdraw charges no fee; preview/execute divergence (withdraw fee f = 5%) ==
+    [state] t=+0.00d TS=200000000000000000000 TAS=210000000000000000000 totalAssets()=210000000000000000000 rate=0 P=0 lastUpdate=+0.00d finishAt=+0.00d W=210000000000000000000
+  previewRedeem(10000000000000000000) = 9975000000000000000; redeem(10000000000000000000) transferred = 10500000000000000000; difference = 525000000000000000
+  previewWithdraw(10000000000000000000) = 10025062656641604009; withdraw(10000000000000000000) burned = 10025062656641604009 shares, receiver got = 10526315789473684209 (requested 10000000000000000000; excess 526315789473684209)
+  withdraw(type(uint256).max) by alice (non-last holder):
+    withdraw(MAX, alice, alice) -> REVERT('asdCRV: insufficient owner shares')
+    redeem(MAX, alice, alice)  [alternative exit] -> OK 94500000000000000000
+  f = 0 (exactness of withdraw with floor rounding): TS=2, TAS=3
+    [state] t=+0.00d TS=2 TAS=3 totalAssets()=3 rate=0 P=0 lastUpdate=+0.00d finishAt=+0.00d W=3
+    withdraw(2) [preview shares=1] -> OK (1, 1)
+  mint rounding: TS=2, TAS=3, mint(1)
+    previewMint(1) = 1; mint(1): assets pulled = 1, shares minted = 0, bal[y] = 0
+
+== S3: empty-interval accrual (lastUpdate not advanced while TAS == 0) ==
+    [after reward 700e18 streamed over 7d] t=+0.00d TS=1000000000000000000000 TAS=1000000000000000000000 totalAssets()=1000000000000000000000 rate=1157407407407407 P=604800 lastUpdate=+0.00d finishAt=+7.00d W=1700000000000000000000
+  t=+1d alice redeems all -> 1099999999999999964800
+    [vault empty] t=+1.00d TS=0 TAS=0 totalAssets()=0 rate=1157407407407407 P=604800 lastUpdate=+1.00d finishAt=+7.00d W=600000000000000035200
+  t=+3d previewDeposit(150e18) = 0  (deposit would mint 150e18 shares: TAS==0 branch)
+  t=+3d mallory deposit(1) -> shares 1
+    [after mallory] t=+3.00d TS=1 TAS=1 totalAssets()=199999999999999929601 rate=1157407407407407 P=604800 lastUpdate=+1.00d finishAt=+7.00d W=600000000000000035201
+  t=+3d victim previewDeposit(150e18) = 0; deposit(150e18) -> shares 0
+    [after victim] t=+3.00d TS=1 TAS=349999999999999929601 totalAssets()=349999999999999929601 rate=1157407407407407 P=604800 lastUpdate=+3.00d finishAt=+7.00d W=750000000000000035201
+  mallory redeems her 1 share -> receives 349999999999999929601 (= 350.000000 sdCRV); victim shares = 0
+    victim redeem(MAX) -> REVERT('asdCRV: withdraw zero share')
+  variant: reward deposit DURING the empty interval orphans the vested-but-uncredited part
+    custody W = 670000000000000035200; ledger+stream before = 669999999999999788800 ; after = 569999999999999721600; orphaned = 100000000000000313600 (= rate*1d = 100000000000000067200)
+
+== P == 0 and empty vault: TAS > 0 with TS == 0 -> every later deposit mints 0 shares ==
+    [after stash depositReward(10e18) on empty vault] t=+0.00d TS=0 TAS=10000000000000000000 totalAssets()=10000000000000000000 rate=0 P=0 lastUpdate=+0.00d finishAt=+0.00d W=10000000000000000000
+  alice deposit(100e18) -> shares 0; bal[alice]=0 TS=0 TAS=110000000000000000000
+    alice redeem(MAX) -> REVERT('asdCRV: withdraw zero share')
+    alice withdraw(100e18) -> REVERT('asdCRV: withdraw zero share')
+  harvest with platform fee on an empty vault (TAS == 0):
+    harvest(assets=5e18) -> REVERT('division by zero (0.7.6 invalid opcode)')
+
+== S4: updateRewardPeriodLength(0) mid-stream (owner) ==
+  settle*=False: t=+2d bob previewRedeem=1099999999999999964800 redeem=1000000000000000000000 (preview - actual = 99999999999999964800)
+  settle*=False: t=+10d P restored, alice redeem=1699999999999999753600; W left=246400
+  settle*=True: t=+2d bob previewRedeem=1099999999999999964800 redeem=1049999999999999982400 (preview - actual = 49999999999999982400)
+  settle*=True: t=+10d P restored, alice redeem=1649999999999999771200; W left=246400

@@ -1,0 +1,15 @@
+  active reward tokens after initialize: 0x73968b9a57c6E53d41345FD57a6E6ae27d6CDB2F,0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512 (stakingToken=0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512)
+  totalSupply=1000000000000000000000 balanceOf(asdCRV)=1000000000000000000000
+== H3.A: harvestBribes (permissionless) calls _notifyReward without _distributePendingReward (L3891) ==
+    checkpoint-before-2nd-bribe=false: rate1=115740740740740 | alice=35000000000000078000 asdCRV=35000000000000078000 total=70000000000000156000 | SDT left in wrapper=69999999999999844000
+    checkpoint-before-2nd-bribe=true: rate1=115740740740740 | alice=69999999999999854000 asdCRV=69999999999999854000 total=139999999999999708000 | SDT left in wrapper=292000
+== H3.B: unregisterRewardToken (R3) then syncActiveRewardTokens (R1) re-notifies the custody balance ==
+    after unregister: active=0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512 historical=0x73968b9a57c6E53d41345FD57a6E6ae27d6CDB2F SDT custody=70000000000000000000
+    claimable alice=34999999999999776000 asdCRV=34999999999999776000
+    after mallory syncActiveRewardTokens(): active=0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512,0x73968b9a57c6E53d41345FD57a6E6ae27d6CDB2F historical=0x73968b9a57c6E53d41345FD57a6E6ae27d6CDB2F
+    rewardData(SDT): rate=115740740740741 queued=291200 finishAt-lastUpdate=604800
+    +16d claimable alice=69999999999999854000 asdCRV=69999999999999854000 sum=139999999999999708000 vs custody=70000000000000000000
+    alice claim() -> OK
+    alice received 69999999999999854000 SDT
+    claim(asdCRV) -> REVERT (VM Exception while processing transaction: reverted with panic code 0x11 (Arithmetic operation overflowed outside of an unchecked block))
+    claimHistorical(asdCRV,[SDT]) -> REVERT (VM Exception while processing transaction: reverted with panic code 0x11 (Arithmetic operation overflowed outside of an unchecked block))

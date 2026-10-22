@@ -1,0 +1,22 @@
+=== T12 paid_off=False : Furnace TU=40000000000000000000000 free CVX=0, AMO debtBalance=33333333333333333333334 ===
+  alice.unlock(minShareOut=0) -> ('ok', 909787165340343859241)
+     debtOut(user)=357465274986373634240 debtBalance(after)=39648553191425934204908 wrapped=False debt-shares=909787165340384026703 lp-shares=909787165340343859241
+  alice.unlock(minShareOut=1) -> ('ok', 909787165340343859241)
+     debtOut(user)=357465274986373634240 debtBalance(after)=39648553191425934204908 wrapped=False debt-shares=909787165340384026703 lp-shares=909787165340343859241
+=== T12 paid_off=True : Furnace TU=0 free CVX=10000000000000000000000, AMO debtBalance=0 ===
+  alice.unlock(minShareOut=0) -> ('revert', 'AladdinCVX L9067: _ratio division by zero (0.7 INVALID)')
+  alice.unlock(minShareOut=1) -> ('revert', 'AladdinCVX L9067: _ratio division by zero (0.7 INVALID)')
+
+=== T12b: partially free CVX: Furnace free CVX smaller than the AMO's debt purchase ===
+  free CVX=0  AMO debtBalance=1000000000000000000000
+  alice.unlock(0) -> ('ok', 893150981313251115265) {'debtOut': 16403351045555004594, 'debtBal': 1852974254368860238888, 'wrapped': False, 'dsh': 893150981313755503904, 'lsh': 893150981313251115265}
+
+=== T12c: exit path when the AMO's Furnace unrealised is 0 (paid-off Furnace) ===
+  bob.withdraw(10000e18 shares)                  -> ('revert', 'AladdinCVX L9067: _ratio division by zero (0.7 INVALID)')
+  bob.withdraw(...) with nothing left to claim   -> ('revert', 'Furnace: withdraw zero CVX')
+  (withdrawToBase L8619-L8646 calls the same _checkpoint(0) and _withdrawDebtToken(_, this))
+
+=== T12d: paid-off Furnace, converted amount not a multiple of 1e9 (pendingBaseToken dust) ===
+  dust=123                    alice.unlock(0) -> ('ok', 0) {'debtOut': 2, 'debtBal': 0, 'wrapped': True, 'dsh': 0, 'lsh': 909388178845497368471}
+  dust=999999999              alice.unlock(0) -> ('ok', 0) {'debtOut': 19625930, 'debtBal': 0, 'wrapped': True, 'dsh': 0, 'lsh': 909388178845479375178}
+  dust=700000000000000005     alice.unlock(0) -> ('revert', 'CLeverAMOBase L8575: division by zero') 

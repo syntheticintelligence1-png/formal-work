@@ -1,0 +1,11 @@
+trial found: bA=639189062038055809266 bB=447474374413978216932 other=3960614769954294115397
+    ('liquidate', 1225113896997647728728)
+    ('checkpoint A (owner re-floored)', None)
+    ('liquidate', 749904313238506790301)
+    ('checkpoint A (owner re-floored)', None)
+    ('liquidate', 639883797614578962450)
+    ('checkpoint A (owner re-floored)', None)
+after B's checkpoint: owner aggregate=523683096230295324212, A=308036965132030262520, B=215646131098265061693, A+B=523683096230295324213, deficit=1 wei
+A withdraws all (308036965132030262520): owner -> 215646131098265061692
+B withdraws all (215646131098265061693): owner 215646131098265061692 - 215646131098265061693 < 0 -> Panic(0x11) at L15364; rejectSharedVote also reverts at L15393
+frequency over 5000 random 3-liquidation traces: owner < A+B in 248 (5.0%)

@@ -1,0 +1,31 @@
+== cross-pool absorption: harvest(A) reads whole-vault balances (L11209-L11213) ==
+  R1 push of B's rewards=False: harvest(A) -> 50000000000000000000 aFXS, harvest(B) -> 50000000000000000000 aFXS; pending alice=50000000000000000000 bob=50000000000000000000
+  R1 push of B's rewards=True: harvest(A) -> 100000000000000000000 aFXS, harvest(B) -> 0 aFXS; pending alice=100000000000000000000 bob=0
+
+== FXS/cvxFXS type aliasing in _claim (L17816-L17830) ==
+  alice pending aFXS = 100000000000000000000; vault cells = {'aFXS@vault': 100000000000000000000}
+  claim as 0x3432..(FXS): REVERT('transfer amount exceeds balance [0x3432..(FXS) of vault]')  <- vault holds no FXS
+  claim as 0xFEEf..(cvxFXS): REVERT('transfer amount exceeds balance [0x3432..(FXS) of vault]')  <- vault holds no FXS
+  claim as USDC: REVERT('transfer amount exceeds balance [0x3432..(FXS) of vault]')  <- vault holds no FXS
+  claim as ETH: REVERT('transfer amount exceeds balance [0x3432..(FXS) of vault]')  <- vault holds no FXS
+  -- now some FXS (pool C's unharvested extra reward) sits in the vault (R1: getReward(vault) on C) --
+  vault cells = {'0x3432..(FXS)@vault': 150000000000000000000, 'aFXS@vault': 100000000000000000000}
+  alice claim as FXS: received 120000000000000000000 FXS (= redeemed cvxFXS amount 120000000000000000000); vault cells now {'0x3432..(FXS)@vault': 30000000000000000000, '0xFEEf..(cvxFXS)@vault': 120000000000000000000}
+  harvest(C) afterwards -> 25000000000000000000 aFXS for carol (should be 125000000000000000000 without the alias); carol pending=25000000000000000000
+  -- ETH branch (L17825-L17828) sends `_amount` (aFXS shares) to msg.sender, not `_amountOut` to recipient --
+  claim as ETH with no ETH in vault: REVERT('transfer amount exceeds balance [ETH of vault]')
+  claim as ETH with 200e18 wei in vault: returns _amountOut=120000000000000000; msg.sender(alice) got 100000000000000000000 wei; recipient(alice_rx) got 0; vault ETH left 100120000000000000000
+
+== _zapAsRewardToken branch reachability with FXS == cvxFXS ==
+  tokens=[cvxFXS constant] -> branches ['FXS-branch'], aFXS out 8333333333333333333 (deposited via depositWithFXS, never aFXS.deposit)
+  tokens=[FXS, cvxFXS] with balances read twice (L11211-L11213) -> REVERT('transfer amount exceeds balance [0x3432..(FXS) of vault]') (double count)
+
+== updateRewardPeriod(pid, 0) mid-stream (owner, L11330-L11336) ==
+  settle*=False: alice (exits +2d) rewards=0; carol at +10d rewards=699999999999999753600
+  settle*=True: alice (exits +2d) rewards=49999999999999982400; carol at +10d rewards=649999999999999771200
+
+== ConcentratorConvexVault: stream during totalShare == 0 is skipped (L11406-L11415) ==
+  alice=99999999999999964800 bob=399999999999999859200 sum=499999999999999824000; aFXS custody=700000000000000000000; orphaned=200000000000000176000
+
+== AladdinCRVConvexVault.harvest (L12279-L12305): ETH balance + whole CRV balance swept into harvested pool ==
+  pending A-holder=100000000000000000000 B-holder=0 (reference 50e18 each)

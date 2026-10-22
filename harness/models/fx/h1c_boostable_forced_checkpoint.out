@@ -1,0 +1,8 @@
+  A.deposit(100e18) (victim, full boost): ok
+  B.deposit(100e18) (control, full boost): ok
+  C.deposit(100e18) (griefer, no ve): ok
+  dist.depositReward(FXN, 7000e18): ok
+  griefer C called checkpoint(A) 24 times (hourly), failures=0
+  A.claim(): ok
+  B.claim(): ok
+  FXN after 1 day: victim A = 137.50424382716049292  control B = 333.3449074074074052

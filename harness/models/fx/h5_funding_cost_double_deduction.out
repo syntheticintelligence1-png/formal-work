@@ -1,0 +1,21 @@
+init: fSupply = 1000000.0  xSupply = 1000000.0  CR = 2.0
+  harvestable() [funding cost pending] = 1.25
+
+== control: price valid ==
+  user.mintFToken(1e9): ok
+  after: totalBaseToken=998.750000001 custody=998.750000001 custody-ledger=0.0 distributed(platform)=1.25
+
+== oracle isValid=false: 5 tiny mints, then price valid again ==
+  user.mintFToken(1e9) #1: ok
+  after #1: totalBaseToken=998.750000001 custody=1000.000000001 custody-ledger=1.25 distributed(platform)=0.0
+  user.mintFToken(1e9) #2: ok
+  after #2: totalBaseToken=997.501564457568214955 custody=1000.000000002 custody-ledger=2.498435544431785045 distributed(platform)=0.0
+  user.mintFToken(1e9) #3: ok
+  after #3: totalBaseToken=996.254695325264913322 custody=1000.000000003 custody-ledger=3.745304677735086678 distributed(platform)=0.0
+  user.mintFToken(1e9) #4: ok
+  after #4: totalBaseToken=995.009394557159826741 custody=1000.000000004 custody-ledger=4.990605446840173259 distributed(platform)=0.0
+  user.mintFToken(1e9) #5: ok
+  after #5: totalBaseToken=993.765664103792032995 custody=1000.000000005 custody-ledger=6.234335901207967005 distributed(platform)=0.0
+  user.mintFToken(1e9) (valid -> hook harvests): ok
+  final: totalBaseToken=992.523505913129659261 custody=998.757841814337626266 custody-ledger=6.234335901207967005 distributed(platform)=1.242158191662373734
+  harvestable() afterwards = 0.0

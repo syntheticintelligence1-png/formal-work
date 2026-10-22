@@ -1,0 +1,12 @@
+per-action commutation defect on the unrealised component, delta^U = alpha(a(s)) - a^E(alpha(s)):
+  claim/sane-TU  n= 1666  max=0.0  min=0.0  polarity(sum>0/sum<0/sum=0)=0/0/1666
+  claim/wrapped-TU n=   46  max=0.0  min=0.0  polarity(sum>0/sum<0/sum=0)=0/0/46
+  dep/sane-TU    n= 3406  max=0.0  min=0.0  polarity(sum>0/sum<0/sum=0)=0/0/3406
+  dep/wrapped-TU n=    9  max=0.0  min=0.0  polarity(sum>0/sum<0/sum=0)=0/0/9
+  dist/sane-TU   n= 3318  max=0.9953056159683883  min=-2.0  polarity(sum>0/sum<0/sum=0)=599/116/2603
+  dist/wrapped-TU n=  109  max=7.99e+17  min=0.0  polarity(sum>0/sum<0/sum=0)=13/0/96
+  poke(linear)/sane-TU n= 1637  max=0.9990331953019285  min=-1.0  polarity(sum>0/sum<0/sum=0)=337/35/1265
+  poke(linear)/wrapped-TU n=   26  max=0.0  min=0.0  polarity(sum>0/sum<0/sum=0)=0/0/26
+  wd/sane-TU     n= 1646  max=0.0  min=0.0  polarity(sum>0/sum<0/sum=0)=0/0/1646
+  wd/wrapped-TU  n=   60  max=0.0  min=0.0  polarity(sum>0/sum<0/sum=0)=0/0/60
+(realised component is the exact complement: delta^R = -delta^U, because U+R is conserved per user)

@@ -1,0 +1,21 @@
+  FXS allowance vault->aFXS after initialize (approve of the 'cvxFXS' constant): 115792089237316195423570985008687907853269984665640564039457584007913129639935
+== H2.cross-pool: harvest(pid) converts whole-vault balances (L11209-L11213) ==
+    R1 push of pool-1 rewards=false: pendingReward(0,alice)=50000000000000000000 pendingReward(1,bob)=50000000000000000000
+    R1 push of pool-1 rewards=true: pendingReward(0,alice)=100000000000000000000 pendingReward(1,bob)=0
+== H2.alias: _claim with claimAsToken != aFXS uses FXS where cvxFXS is meant (L17816-L17830) ==
+    vault: aFXS=100000000000000000000 FXS=0 cvxFXS=0
+    alice claim(0, aliceRx, 0, FXS) with no FXS in vault -> REVERT (VM Exception while processing transaction: reverted with panic code 0x11 (Arithmetic operation overflowed outside of an unchecked block))
+    alice claim(0, aliceRx, 0, cvxFXS(real)) with no FXS in vault -> REVERT (VM Exception while processing transaction: reverted with panic code 0x11 (Arithmetic operation overflowed outside of an unchecked block))
+    alice claim(0, aliceRx, 0, USDC) with no FXS in vault -> REVERT (VM Exception while processing transaction: reverted with panic code 0x11 (Arithmetic operation overflowed outside of an unchecked block))
+    alice claim(0, aliceRx, 0, ETH) with no FXS in vault -> REVERT (VM Exception while processing transaction: reverted with panic code 0x11 (Arithmetic operation overflowed outside of an unchecked block))
+    after R1 getReward(vault) on pool-2's reward pool: vault FXS=150000000000000000000
+    alice claim as FXS: aliceRx FXS=120000000000000000000; vault FXS=30000000000000000000 cvxFXS(stranded)=120000000000000000000 aFXS=0
+    harvest(2) afterwards: pendingReward(2,carol)=25000000000000000000 (125e18 without the alias)
+    alice claim as ETH, vault holds FXS but no ETH -> REVERT (VM Exception while processing transaction: reverted with reason string 'transfer ETH failed')
+    alice claim as ETH with 200 ETH in vault: returns 120000000000000000; msg.sender(alice) +100000000000000000000 wei; recipient(aliceRx) +0 wei; vault ETH left 100120000000000000000
+== H2.dead-branch: _zapAsRewardToken with FXS == cvxFXS ==
+    tokens=[cvxFXS constant] amounts=[10e18]: aFXS minted=8333333333333333333; FXS pulled=10000000000000000000; real cvxFXS pulled=0 (aFXS.deposit path never used)
+== H2.duplicate-entry: pool reward list [FXS, cvxFXS-constant] (owner config) read through harvest() ==
+    vault FXS before harvest(2) = 30000000000000000000 (+50e18 to be claimed by getReward)
+    harvest(2) with convexRewardTokens=[FXS, FXS] -> REVERT (VM Exception while processing transaction: reverted with panic code 0x11 (Arithmetic operation overflowed outside of an unchecked block))
+    harvest(2) with convexRewardTokens=[FXS] (control) -> OK

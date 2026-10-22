@@ -1,0 +1,48 @@
+=== T01a: freeze via 1-wei distribute after finishAt (P = 7 days) ===
+  alice.deposit(1000e18)                                     -> ('ok', (1000000000000000000000, 0))
+  bob.deposit(500e18)                                        -> ('ok', (500000000000000000000, 0))
+  locker harvest -> distribute(100e18)                       -> ('ok', None)
+  state: TU=1500000000000000000000 TR=0 acc=0 idx=0 lpo=0 | rate=165343915343915 P=604800 lastUpd=1700000000 finishAt=1700604800 | cvx=100000000000000000000 staked=0 clev=1500000000000000000000
+      alice: stored=U(unr=1000000000000000000000, rea=0, paid=0, idx=0) alpha=(1000000000000000000000, 0)
+      bob: stored=U(unr=500000000000000000000, rea=0, paid=0, idx=0) alpha=(500000000000000000000, 0)
+  poke updatePendingDistribution() @t0+3d                    -> ('ok', None)
+  @t0+8d (> finishAt=1700604800): state: TU=1457142857142857232000 TR=42857142857142768000 acc=330560013580340241872630281378060662666 idx=1 lpo=0 | rate=165343915343915 P=604800 lastUpd=1700259200 finishAt=1700604800 | cvx=100000000000000000000 staked=0 clev=1500000000000000000000
+  R1: locker.donate(1) -> distribute(1)                      -> ('ok', None)
+  after donate(1): TU=1400000000000000208000 TR=99999999999999792000 acc=317596875792875946418304513306450597612 idx=2 lpo=0 | rate=0 P=604800 lastUpd=1700691200 finishAt=1701296000 | cvx=100000000000000000001 staked=0 clev=1500000000000000000000
+  alice.withdrawAll() @+12s                                  -> ('revert', 'Furnace: overflow')
+  alice.claim() @+12s                                        -> ('revert', 'Furnace: overflow')
+  bob.exit() @+12s                                           -> ('revert', 'Furnace: overflow')
+  carol.deposit(10e18) @+12s                                 -> ('revert', 'Furnace: overflow')
+  locker harvest -> distribute(100e18) @+12s                 -> ('revert', 'Furnace: overflow')
+  updatePendingDistribution() @+12s                          -> ('revert', 'Furnace: overflow')
+  alice.withdrawAll() @+1 year                               -> ('revert', 'Furnace: overflow')
+  -- recovery attempt: governor updatePeriodLength(0) --
+  gov.updatePeriodLength(0)                                  -> ('ok', None)
+  alice.withdrawAll()                                        -> ('ok', 933333333333333472000)
+  state: TU=466666666666666736000 TR=99999999999999792000 acc=317596875792875946418304513306450597612 idx=2 lpo=0 | rate=0 P=0 lastUpd=1700691200 finishAt=1701296000 | cvx=100000000000000000001 staked=0 clev=566666666666666528000
+      alice: stored=U(unr=0, rea=66666666666666528000, paid=317596875792875946418304513306450597612, idx=2) alpha=(0, 66666666666666528000)
+      bob: stored=U(unr=500000000000000000000, rea=0, paid=0, idx=0) alpha=(466666666666666736000, 33333333333333264000)
+  gov.updatePeriodLength(7d) (re-enable linear mode)         -> ('ok', None)
+  bob.exit() (TU>0 still: bob unrealised)                    -> ('revert', 'Furnace: overflow')
+  locker harvest -> distribute(100e18)                       -> ('revert', 'Furnace: overflow')
+  => linear mode cannot be re-enabled while TU>0 (stale lastUpdate, rate=0 persists)
+
+=== T01b: same block repair (honest distribute in the SAME block as donate(1)) ===
+  alice.deposit(1000e18)                                     -> ('ok', (1000000000000000000000, 0))
+  distribute(100e18)                                         -> ('ok', None)
+  R1 donate(1)                                               -> ('ok', None)
+  honest harvest distribute(100e18) same block               -> ('ok', None)
+  alice.withdrawAll() next block                             -> ('ok', 899998015873016081020)
+  => the attack needs one block boundary after donate(1) with no distribute >= P in that block
+
+=== T01c: boundary: TU == 0 at the poke -> no revert (paid-off branch) ===
+  distribute(5) with TU=0                                    -> ('ok', None)
+  updatePendingDistribution() TU=0                           -> ('ok', None)
+  state: TU=0 TR=0 acc=0 idx=1 lpo=1 | rate=0 P=604800 lastUpd=1700000012 finishAt=1700604800 | cvx=5 staked=0 clev=0
+
+=== T01d: P = 0 configuration: donate(1) is harmless ===
+  alice.deposit(1000e18)                                     -> ('ok', (1000000000000000000000, 0))
+  donate(1) -> distribute(1)                                 -> ('ok', None)
+  alice.withdrawAll()                                        -> ('ok', 999999999999999999999)
+  state: TU=0 TR=1 acc=340282366920938463463034325064847272992 idx=1 lpo=0 | rate=0 P=0 lastUpd=0 finishAt=0 | cvx=1 staked=0 clev=1
+      alice: stored=U(unr=0, rea=1, paid=340282366920938463463034325064847272992, idx=1) alpha=(0, 1)

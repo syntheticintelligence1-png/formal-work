@@ -127,6 +127,47 @@ The eager reference machine credits each reward at its arrival time. It gives Bo
 
 Note that the poker chooses only the *timing*. The amounts are fixed by accrued yield.
 
+**K1-F2 (Pre1 NOT discharged on the rebalance pools' FXN gauge path). R0, with schedule-steerable magnitude. Proven-executed.**
+
+*Discharge failure.* `BoostableRebalancePool._checkpoint` mints FXN from the gauge and calls `_notifyReward(fxn, _minted)` at **L16306**. The accrual, `MultipleRewardCompoundingAccumulator._checkpoint` → `_distributePendingReward`, runs only afterwards, at L16309. `ShareableRebalancePool._checkpoint` has the same order (L15264–L15269).
+
+`_notifyReward` (L3728) does not accrue. So `LinearReward.increase` runs with `lastUpdate < now`. The mint branch fires on the first checkpoint more than one day after `claimAt` (L16301). Every `deposit`, `withdraw`, `claim` and `checkpoint(·)` can trigger it, so the trigger is reachable at R1.
+
+This defect was found by intersecting the balance-differential-read atlas (`atlas/A3`, rows L16302–L16304) with the K1 precondition.
+
+*Consequences, by K1 branch:*
+
+- **β1**: the first mint-triggering checkpoint at or after `finishAt` overwrites the un-accrued tail `rate·(finishAt − lastUpdate)`. That FXN stays in custody, but appears in no ledger, queue or rate (orphaned custody, B1).
+- **β2**: every daily mint rolls the un-accrued window `[lastUpdate, now]` into a fresh 7-day period. Stakers present during that window lose it to later stakers. A user whose own `withdraw` triggers the mint receives 0 for that window.
+
+*Trace* (`k1_pool_gauge_pre1.js`). A is the only staker. The gauge mints 700e18 at t₁; emissions are 0 afterwards; P = 7d.
+
+| Run | Last in-period poke | Next poke | `claimable(A)` (final) | Rate (final) | FXN held | Orphaned |
+|---|---|---|---|---|---|---|
+| control: same emission via `depositReward` (accrue-then-notify, L3659) | t₁+1d | t₁+11d, t₁+30d | 484e18 and still streaming | 3.57e14/s | 700e18 | 0 so far |
+| gauge path | t₁+1d | t₁+11d, t₁+30d | **40e18, frozen** | 0 | 700e18 | **660e18** |
+| gauge path | t₁+6.9d | t₁+11d, t₁+30d | **276e18, frozen** | 0 | 700e18 | **424e18** |
+
+A's boost ratio reads 0.4 in all three runs, even though A holds the entire ve supply. That reproduces the f(x) analysis' boost-history defect (`04-fx.md`). The 0.4 factor applies equally to all runs, so it does not affect the comparison.
+
+The orphaned amount equals the sum of the tails destroyed at each post-`finishAt` mint:
+
+- first run: 600 + 60 = 660;
+- second run: 10 + 414 = 424.
+
+Each queue that gets re-notified is destroyed again at the next post-`finishAt` mint.
+
+*Required assumption for K1-I1 in the pools:* Pre1 holds. **[violated]** The relaxation is the code itself.
+
+*Refinement gap (Impl ⊄ Spec).* The K3/K4 specification is the integral of `rate(t)/S(t)` over time. The implementation removes integral mass at β1 and moves it forward in time at β2.
+
+*Magnitude and rank.*
+
+- β2 reallocation happens on every mint (R0). Its size, `rate·(now − lastUpdate)`, is chosen by whoever pokes (R1).
+- β1 destruction needs at least ~7 days with no checkpoint (R0 liveness condition). This is realistic for low-activity pools.
+
+**Second notify site checked (proof of absence for Pre1).** The boost-forfeit re-notify at L16348 runs inside `_updateSnapshot`. That is after `_distributePendingReward` in `MultipleRewardCompoundingAccumulator._checkpoint`, so `lastUpdate = now` and Pre1 holds. It is still an R1 notify trigger: any `checkpoint(account)` of an unboosted account re-notifies. So it is a B3 sampling point for the FXN stream.
+
 **K1-I4 (bounds).**
 
 - `rate < 2⁸⁰`: **[E]**, SafeCast.
